@@ -1448,7 +1448,8 @@ endfunction "}}}
 
 " vimwiki#base#TO_header
 function! vimwiki#base#TO_header(inner, visual) "{{{
-  if !search('^\(=\+\).\+\1\s*$', 'bcW')
+  let rxH = g:vimwiki_rxH
+  if !search('^\('.rxH.'\+\).\+\1\=\s*$', 'bcW')
     return
   endif
   
@@ -1465,9 +1466,17 @@ function! vimwiki#base#TO_header(inner, visual) "{{{
   if a:visual && is_header_selected
     if level > 1
       let level -= 1
-      call search('^\(=\{'.level.'\}\).\+\1\s*$', 'bcW')
+      call search('^\('.rxH.'\{'.level.'}\)[^'.rxH.']\+\1\=\s*$', 'bcW')
     else
       let advance = 1
+    endif
+  endif
+
+  if a:inner
+    call cursor(line('.') + 1, 0)
+    if getline(line('.')) =~ '^\s*$'
+      let lnum = nextnonblank(line('.') + 1)
+      call cursor(lnum, 0)
     endif
   endif
 
@@ -1477,7 +1486,7 @@ function! vimwiki#base#TO_header(inner, visual) "{{{
     call cursor(sel_end + advance, 0)
   endif
 
-  if search('^\(=\{1,'.level.'}\).\+\1\s*$', 'W')
+  if search('^\('.rxH.'\{1,'.level.'}\)[^'.rxH.']\+\1\=\s*$', 'W')
     call cursor(line('.') - 1, 0)
   else
     call cursor(line('$'), 0)
@@ -1805,6 +1814,55 @@ function! vimwiki#base#table_of_contents(create)
   call vimwiki#base#update_listing_in_buffer(lines, g:vimwiki_toc_header, links_rx,
         \ 1, a:create)
 endfunction
+
+" vimwiki#base#GotoHeader
+function! vimwiki#base#GotoHeader(direction, ...) "{{{
+  let rxH = g:vimwiki_rxH
+
+  if a:direction == 0
+    let match_cursor = 'bc'
+    let warning = 'outside any header'
+  elseif a:direction > 0
+    let match_cursor = ''
+    let warning = 'no next header'
+  elseif a:direction < 0
+    let match_cursor = 'b'
+    let warning = 'no previous header'
+  endif
+
+  if a:0 > 0
+    let lnum = search('^\('.rxH.'\+\).\+\1\=\s*$', 'bcW')
+    let level = vimwiki#u#count_first_sym(getline(lnum))
+    if a:1 > 0
+      let level += 1
+    elseif a:1 < 0
+      let level -= 1
+    endif
+
+    if level <= 0
+      echo 'no upper header'
+      return
+    endif
+  endif
+
+  if exists('level')
+    let lnum = search('^\('.rxH.'\{1,'.level.'}\)[^'.rxH.']\+\1\=\s*$', 'nW'.match_cursor)
+
+    if lnum > 0 && vimwiki#u#count_first_sym(getline(lnum)) < level
+      let lnum = 0
+    endif
+  else
+    let lnum = search('^\('.rxH.'\+\).\+\1\=\s*$', 'nW'.match_cursor)
+  endif
+
+  if lnum == 0
+    echo warning
+    return
+  endif
+
+  call cursor(lnum, 1)
+  return
+endfunction " }}}
 "}}}
 
 " LINK functions {{{

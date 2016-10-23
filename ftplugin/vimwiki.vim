@@ -333,7 +333,6 @@ if g:vimwiki_use_mouse
   nnoremap <silent><buffer> <RightMouse><LeftMouse> :VimwikiGoBackLink<CR>
 endif
 
-
 if !hasmapto('<Plug>Vimwiki2HTML')
   exe 'nmap <buffer> '.g:vimwiki_map_prefix.'h <Plug>Vimwiki2HTML'
 endif
@@ -632,6 +631,36 @@ endif
 nnoremap <silent><buffer> <Plug>VimwikiRemoveHeaderLevel :
       \<C-U>call vimwiki#base#RemoveHeaderLevel()<CR>
 
+if !hasmapto('<Plug>VimwikiGoUpperHeader')
+  nmap <silent><buffer> ]u <Plug>VimwikiGoUpperHeader
+  nmap <silent><buffer> [u <Plug>VimwikiGoUpperHeader
+endif
+nnoremap <silent><buffer> <Plug>VimwikiGoUpperHeader :
+      \<C-u>call vimwiki#base#GotoHeader(-1, -1)<CR>
+
+if !hasmapto('<Plug>VimwikiGoNextHeader')
+  nmap <silent><buffer> ]] <Plug>VimwikiGoNextHeader
+endif
+nnoremap <silent><buffer> <Plug>VimwikiGoNextHeader :
+      \<C-u>call vimwiki#base#GotoHeader(+1)<CR>
+
+if !hasmapto('<Plug>VimwikiGoPrevHeader')
+  nmap <silent><buffer> [[ <Plug>VimwikiGoPrevHeader
+endif
+nnoremap <silent><buffer> <Plug>VimwikiGoPrevHeader :
+      \<C-u>call vimwiki#base#GotoHeader(-1)<CR>
+
+if !hasmapto('<Plug>VimwikiGoNextSiblingHeader')
+  nmap <silent><buffer> ]= <Plug>VimwikiGoNextSiblingHeader
+endif
+nnoremap <silent><buffer> <Plug>VimwikiGoNextSiblingHeader :
+      \<C-u>call vimwiki#base#GotoHeader(+1, 0)<CR>
+
+if !hasmapto('<Plug>VimwikiGoPrevSiblingHeader')
+  nmap <silent><buffer> [= <Plug>VimwikiGoPrevSiblingHeader
+endif
+nnoremap <silent><buffer> <Plug>VimwikiGoPrevSiblingHeader :
+      \<C-u>call vimwiki#base#GotoHeader(-1, 0)<CR>
 
 " }}}
 
